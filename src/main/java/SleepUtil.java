@@ -2,7 +2,7 @@ class SleepUtil {
 
     private static final int NAP_TIME = 5; //5 sekund
 
-    public static void nap() {
+    static void nap() {
         nap(NAP_TIME);
     }
 

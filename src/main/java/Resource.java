@@ -1,28 +1,32 @@
 import java.util.concurrent.Semaphore;
 
 class Resource implements LockForReadWrite{
-    private int readerCount;  // the number of active readers
-    private Semaphore mutex;  // semafor pre readerov
-    private Semaphore resource;     // semafor na kontrolu pristupu k resourcu
+    private int readerCount;  // pocet aktivnych readerov
+    private Semaphore readersLock;  // semafor pre readerov
+    private Semaphore resourceLock;     // semafor na kontrolu pristupu k resourcu
 
-    public Resource() {
+    Resource() {
         readerCount = 0;
-        mutex = new Semaphore(1);
-        resource = new Semaphore(1);
+        readersLock = new Semaphore(1);
+        resourceLock = new Semaphore(1);
     }
 
     public void acquireReadLock(int readerNum) {
         try{
-            mutex.acquire();
+            //ziskam readersky semafor
+            readersLock.acquire();
         }
-        catch (InterruptedException e) {}
+        catch (InterruptedException e) {
+            //mozny deadlock!
+        }
 
+        //zvysim pocet readerov
         ++readerCount;
 
-        // ak som prvy reader poviem vsetkym, ze prave citam ja
+        // ak som jeden reader poviem vsetkym, ze prave citam ja
         if (readerCount == 1){
             try{
-                resource.acquire();
+                resourceLock.acquire();
             }
             catch (InterruptedException e) {
                 //mozny deadlock!
@@ -31,33 +35,37 @@ class Resource implements LockForReadWrite{
 
         System.out.println("Reader " + readerNum + " prave cita. Pocet readerov = " + readerCount);
 
-        mutex.release();
+        //nemam readerov, releasnem readersky lock
+        readersLock.release();
     }
 
     public void releaseReadLock(int readerNum) {
         try{
             //mutual exclusion for readerCount
-            mutex.acquire();
+            readersLock.acquire();
         }
         catch (InterruptedException e) {
             //mozny deadlock!
         }
 
+        //znizim pocet readerov
         --readerCount;
 
-        // ak som posledny reader poviem vsetkym, ze uz sa necita
+        // ak je 0 readerov poviem vsetkym, ze uz sa necita
         if (readerCount == 0){
-            resource.release();
+            resourceLock.release();
         }
 
         System.out.println("Reader " + readerNum + " prestal citat. Pocet readerov = " + readerCount);
 
-        mutex.release();
+        //releasnem readersky lock
+        readersLock.release();
     }
 
     public void acquireWriteLock(int writerNum) {
         try{
-            resource.acquire();
+            //skusim ziskat lock k resourcu
+            resourceLock.acquire();
         }
         catch (InterruptedException e) {
             //mozny deadlock!
@@ -67,7 +75,8 @@ class Resource implements LockForReadWrite{
 
     public void releaseWriteLock(int writerNum) {
         System.out.println("Writer " + writerNum + " prestal prave zapisovat.");
-        resource.release();
+        //prestanem citat, releasnem lock pre resource
+        resourceLock.release();
     }
 
 
