@@ -17,19 +17,17 @@ class Resource implements LockForReadWrite{
             readersLock.acquire();
         }
         catch (InterruptedException e) {
-            //mozny deadlock!
         }
 
         //zvysim pocet readerov
         ++readerCount;
 
-        // ak som jeden reader poviem vsetkym, ze prave citam ja
+        // ak som prvy reader poviem, ze prave citam ja
         if (readerCount == 1){
             try{
                 resourceLock.acquire();
             }
             catch (InterruptedException e) {
-                //mozny deadlock!
             }
         }
 
@@ -45,7 +43,6 @@ class Resource implements LockForReadWrite{
             readersLock.acquire();
         }
         catch (InterruptedException e) {
-            //mozny deadlock!
         }
 
         //znizim pocet readerov
@@ -68,7 +65,6 @@ class Resource implements LockForReadWrite{
             resourceLock.acquire();
         }
         catch (InterruptedException e) {
-            //mozny deadlock!
         }
         System.out.println("Writer " + writerNum + " prave zapisuje.");
     }

@@ -11,7 +11,6 @@ class SleepUtil {
         try {
             Thread.sleep(sleeptime * 1000);
         } catch (InterruptedException e) {
-            //nieco sa stalo (deadlock!)
         }
     }
 
